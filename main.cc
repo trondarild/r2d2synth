@@ -106,7 +106,7 @@ int main() {
     ikaros::matrix happySound = synth.generateHappySound(1.0f);
     playMatrixAsAudio(happySound);
     usleep(500);
-    */
+    
     // Generate and play a surprised R2D2 sound
     std::cout << "Playing surprised R2D2 sound..." << std::endl;
     ikaros::matrix surprisedSound = synth.generateSurprisedSound(0.5f);
@@ -118,5 +118,32 @@ int main() {
     std::cout << "Playing wow R2D2 sound..." << std::endl;
     ikaros::matrix wowSound = synth.generateWowSound(2.0f);
     playMatrixAsAudio(wowSound);
+    usleep(500);
+
+    std::cout << "Playing protest R2D2 sound..." << std::endl;
+    ikaros::matrix protest = synth.generateProtestSound(1.5f);
+    playMatrixAsAudio(protest);
+    usleep(500);
+
+    std::cout << "Playing indignation R2D2 sound..." << std::endl;
+    ikaros::matrix indignation = synth.generateIndignationSound(1.0f);
+    playMatrixAsAudio(indignation);
+    */
+
+    std::cout << "Playing light titter (intensity 0.1) R2D2 sound..." << std::endl;
+    ikaros::matrix titter = synth.generateLaughterSound(1.5f, 0.1f);
+    playMatrixAsAudio(titter);
+    usleep(500);
+
+    std::cout << "Playing medium chuckle (intensity 0.5) R2D2 sound..." << std::endl;
+    ikaros::matrix chuckle = synth.generateLaughterSound(1.5f, 0.5f);
+    playMatrixAsAudio(chuckle);
+    usleep(500);
+
+    std::cout << "Playing hearty laugh (intensity 1.0) R2D2 sound..." << std::endl;
+    ikaros::matrix laugh = synth.generateLaughterSound(1.5f, 1.0f);
+    playMatrixAsAudio(laugh);
+
+
     return 0;
 }

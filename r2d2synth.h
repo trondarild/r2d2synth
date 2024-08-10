@@ -23,6 +23,15 @@ private:
         return 1.0f;
     }
 
+    float generateNoise(float amplitude) {
+        return amplitude * (uniformDist(rng) * 2 - 1);
+    }
+
+    float generateLaughPulse(float t, float baseFreq, float freqRange, float pulseRate) {
+        float freq = baseFreq + freqRange * std::sin(2 * M_PI * pulseRate * t);
+        return std::sin(2 * M_PI * freq * t);
+    }
+
 public:
     R2D2Synth(int sampleRate = 44100) : sampleRate(sampleRate), 
                                         rng(std::random_device{}()),
@@ -114,6 +123,88 @@ public:
             float envelope = applyEnvelope(t, duration, 0.1f, 0.2f);
             
             sound(i) = 0.3f * envelope * sample;
+        }
+
+        return sound;
+    }
+    ikaros::matrix generateProtestSound(float duration) {
+        int numSamples = static_cast<int>(duration * sampleRate);
+        ikaros::matrix sound(numSamples);
+
+        float baseFreq = 800;
+        float freqRange = 400;
+        float chirpRate = 20;
+        int numChirps = 5;
+        float chirpDuration = duration / numChirps;
+
+        for (int chirp = 0; chirp < numChirps; chirp++) {
+            int startSample = chirp * chirpDuration * sampleRate;
+            int endSample = std::min((chirp + 1) * chirpDuration * sampleRate, (float)numSamples);
+
+            for (int i = startSample; i < endSample; i++) {
+                float t = static_cast<float>(i - startSample) / sampleRate;
+                float sample = generateChirp(t, baseFreq, freqRange, chirpRate);
+                float envelope = applyEnvelope(t, chirpDuration, 0.01f, 0.05f);
+                sound(i) = 0.5f * envelope * sample;
+            }
+        }
+
+        return sound;
+    }
+
+    ikaros::matrix generateIndignationSound(float duration) {
+        int numSamples = static_cast<int>(duration * sampleRate);
+        ikaros::matrix sound(numSamples);
+
+        float baseFreq = 1200;
+        float freqRange = 600;
+        float chirpRate = 30;
+        float noiseFactor = 0.2f;
+
+        for (int i = 0; i < numSamples; i++) {
+            float t = static_cast<float>(i) / sampleRate;
+            float modulation = std::pow(std::sin(2 * M_PI * 2 * t / duration), 2);
+            float instantFreq = baseFreq + freqRange * modulation;
+            float sample = std::sin(2 * M_PI * instantFreq * t);
+            sample += 0.5f * std::sin(4 * M_PI * instantFreq * t);
+            sample += generateNoise(noiseFactor);
+            float envelope = applyEnvelope(t, duration, 0.05f, 0.1f);
+            sound(i) = 0.4f * envelope * sample;
+        }
+
+        return sound;
+    }
+
+    ikaros::matrix generateLaughterSound(float duration, float intensity) {
+        intensity = std::clamp(intensity, 0.1f, 1.0f);
+        int numSamples = static_cast<int>(duration * sampleRate);
+        ikaros::matrix sound(numSamples);
+
+        float baseFreq = 1000 + intensity * 500;  // Higher pitch for more intense laughter
+        float freqRange = 200 + intensity * 300;  // Wider frequency range for more intense laughter
+        float pulseRate = 5 + intensity * 15;     // Faster pulses for more intense laughter
+        
+        int numPulses = static_cast<int>(4 + intensity * 8);  // More pulses for more intense laughter
+        float pulseDuration = duration / numPulses;
+        float pulseSpacing = pulseDuration * 0.2f;  // 20% of pulse duration for spacing
+
+        for (int pulse = 0; pulse < numPulses; pulse++) {
+            float pulseStart = pulse * pulseDuration;
+            float pulseEnd = pulseStart + pulseDuration - pulseSpacing;
+
+            for (int i = 0; i < numSamples; i++) {
+                float t = static_cast<float>(i) / sampleRate;
+                if (t >= pulseStart && t < pulseEnd) {
+                    float pulseT = t - pulseStart;
+                    float sample = generateLaughPulse(pulseT, baseFreq, freqRange, pulseRate);
+                    float envelope = applyEnvelope(pulseT, pulseDuration - pulseSpacing, 0.01f, 0.05f);
+                    
+                    // Add some randomness to the amplitude for a more natural sound
+                    float randomFactor = 1.0f + 0.2f * (uniformDist(rng) - 0.5f);
+                    
+                    sound(i) += 0.5f * envelope * sample * randomFactor * intensity;
+                }
+            }
         }
 
         return sound;
